@@ -1,0 +1,44 @@
+package htmlview
+
+import (
+	"html/template"
+	"net/http"
+)
+
+type Page struct {
+	tmpl       *template.Template
+	args       map[string]interface{}
+	Header     http.Header
+	StatusCode int
+}
+
+func (p *Page) Set(name string, value interface{}) *Page {
+	if p.args == nil {
+		p.args = make(map[string]interface{})
+	}
+	p.args[name] = value
+
+	return p
+}
+
+func (p *Page) Get(name string) interface{} {
+	return p.args[name]
+}
+
+func (p *Page) Render(w http.ResponseWriter) error {
+	// Copy headers
+	if len(p.Header) > 0 {
+		hdr := w.Header()
+		for k, v := range p.Header {
+			hdr[k] = v
+		}
+	}
+
+	// Set the return code
+	if p.StatusCode != 0 {
+		w.WriteHeader(p.StatusCode)
+	}
+
+	// Execute the template
+	return p.tmpl.Execute(w, p.args)
+}

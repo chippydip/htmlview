@@ -8,13 +8,13 @@ import (
 type Page struct {
 	tmpl       *template.Template
 	args       map[string]interface{}
-	Header     http.Header
+	header     http.Header
 	StatusCode int
 }
 
 func (p *Page) Set(name string, value interface{}) *Page {
 	if p.args == nil {
-		p.args = make(map[string]interface{})
+		p.args = map[string]interface{}{}
 	}
 	p.args[name] = value
 
@@ -25,11 +25,18 @@ func (p *Page) Get(name string) interface{} {
 	return p.args[name]
 }
 
+func (p *Page) Header() http.Header {
+	if p.header == nil {
+		p.header = http.Header{}
+	}
+	return p.header
+}
+
 func (p *Page) Render(w http.ResponseWriter) error {
 	// Copy headers
-	if len(p.Header) > 0 {
+	if len(p.header) > 0 {
 		hdr := w.Header()
-		for k, v := range p.Header {
+		for k, v := range p.header {
 			hdr[k] = v
 		}
 	}
